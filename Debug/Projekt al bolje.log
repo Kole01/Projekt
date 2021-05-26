@@ -1,0 +1,4 @@
+﻿  function.c
+C:\Users\Mihael\source\repos\Projekt al bolje\Projekt al bolje\function.c(118,27): warning C4474: 'printf' : too many arguments passed for format string
+C:\Users\Mihael\source\repos\Projekt al bolje\Projekt al bolje\function.c(118,27): message : placeholders and their parameters expect 0 variadic arguments, but 1 were provided
+  Projekt al bolje.vcxproj -> C:\Users\Mihael\source\repos\Projekt al bolje\Debug\Projekt al bolje.exe
