@@ -9,6 +9,10 @@
 
 int id = 0;
 int mines = 0;
+int fieldUser[20][20];
+int field[20][20];
+int size=0;
+
 
 void menu() { // Izbornik
 
@@ -35,7 +39,7 @@ void menu() { // Izbornik
 	switch (choice) {
 	case 1:
 
-		difficulty();
+		boardDifficulty();
 		break;
 
 	case 2:
@@ -64,7 +68,7 @@ void menu() { // Izbornik
 
 }
 
-void difficulty() {
+void boardDifficulty() {
 	system("cls");
 	int choice;
 	//Printanje podizbornika!
@@ -86,12 +90,18 @@ void difficulty() {
 	switch (choice) {
 	case 1:
 
-		game8x8();
+		mines = 10;
+		size = 8;
+		boardGenerate();
+		boardPrint();
 		break;
 
 	case 2:
-
-		game16x16();
+		size = 16;
+		mines = 40;
+		
+		boardGenerate();
+		boardPrint();
 		break;
 
 	case 3:
@@ -104,50 +114,160 @@ void difficulty() {
 
 }
 
-void game8x8() {
-	int i, j, k;
-	mines = 10;
 
-	for (i = 0; i < 8; i++)
-		printf("+---");
+void boardGenerate() {
+
+	srand(time(NULL));
+	int randomNumber;
+	int i, j;
+	int minesCheck=0;
+	int minesNumber;
+	//Postavljanje mina na mjesta u polju, oznacena brojem 99
+	do {
+		for (i = 0; i < size; i++) {
+			for (j = 0; j < size; j++) {
+				randomNumber = rand() % 101;
+				if (randomNumber < 8) {
+					field[i][j] = 99;
+					minesCheck++;
+				}
+
+			}
+		}
+
+	} while (minesCheck != mines);
+
+
+	//Postavljanje brojeva koji oznacuju broj mina oko njih
+	for (i = 0; i < size; i++) {
+		for (j = 0; j < size; j++) {
+			minesNumber = 0;
+			if (field[i][j] == 99) {
+				
+			}
+			else {
+				if (i == 0 && j == 0) {
+					if (field[i][j + 1] == 99)minesNumber++;
+					if (field[i + 1][j] == 99)minesNumber++;
+					if (field[i + 1][j + 1] == 99)minesNumber++;
+					field[i][j] = minesNumber;
+				}
+				if (i == 0 && j > 0) {
+					if (field[i][j-1] == 99)minesNumber++;
+					if (field[i][j+1] == 99)minesNumber++;
+					if (field[i+1][j] == 99)minesNumber++;
+					if (field[i+1][j-1] == 99)minesNumber++;
+					if (field[i+1][j+1] == 99)minesNumber++;
+					field[i][j] = minesNumber;
+				}
+				if (j == 0 && i >0) {
+					if (field[i-1][j] == 99)minesNumber++;
+					if (field[i+1][j] ==99)minesNumber++;
+					if (field[i][j+1] == 99)minesNumber++;
+					if (field[i-1][j+1] == 99)minesNumber++;
+					if (field[i+1][j+1] == 99)minesNumber++;
+					field[i][j] = minesNumber;
+				}
+				if(i<size-1 && j<size-1) {
+					if (field[i-1][j-1] == 99)minesNumber++;
+					if (field[i-1][j] == 99)minesNumber++;
+					if (field[i-1][j+1] == 99)minesNumber++;
+					if (field[i][j-1] == 99)minesNumber++;
+					if (field[i][j+1] == 99)minesNumber++;
+					if (field[i+1][j-1] == 99)minesNumber++;
+					if (field[i+1][j] == 99)minesNumber++;
+					if (field[i+1][j+1] == 99)minesNumber++;
+					field[i][j] = minesNumber;
+				}
+				if (i == size - 1 && j < size - 1) {
+					if (field[i-1][j] == 99)minesNumber++;
+					if (field[i-1][j-1] == 99)minesNumber++;
+					if (field[i-1][j+1] == 99)minesNumber++;
+					if (field[i][j-1] == 99)minesNumber++;
+					if (field[i][j+1] == 99)minesNumber++;
+					field[i][j] = minesNumber;
+				}
+				if (i < size - 1 && j == size - 1) {
+					if (field[i-1][j] == 99)minesNumber++;
+					if (field[i-1][j-1] == 99)minesNumber++;
+					if (field[i][j-1] == 99)minesNumber++;
+					if (field[i+1][j-1] == 99)minesNumber++;
+					if (field[i+1][j] == 99)minesNumber++;
+					field[i][j] = minesNumber;
+					//if (field[i][j] == 99)minesNumber++;
+				}
+				if (i == size - 1 && j == size - 1) {
+					if (field[i-1][j-1] == 99)minesNumber++;
+					if (field[i][j-1] == 99)minesNumber++;
+					if (field[i-1][j] == 99)minesNumber++;
+					field[i][j] = minesNumber;
+				}
+			}
+		}
+	}
+}
+
+void boardGuess() {
+	int x, y;
+	do { // korisnik odabire koje polje ce se pogledati!
+		printf("Zadaj koordinatu x: ");
+		scanf("%d", &x);
+		printf("Zadaj koordinatu y: ");
+		scanf("%d", &y);
+		if (field[x][y] == 99) {
+			printf("Odabrali ste polje s minom!");
+			break;	// Umetnit funckiju koja prati score i upisuje ga u datoteku!
+		}
+
+	} while (field[x][y] != 99);
+	
+
+
+}
+
+void boardPrint() { //pritanje igre
+	int i=0, j=0, k=0;
+	printf("\n");
+	
+	for (i = 0; i < size; i++) {
+		
+		if(i<9)printf("    %d", i);
+		else if(i==9)printf("    %d ", i);
+		else printf("   %d", i);
+		
+
+	}
+	printf("\n");
+	printf("  ");
+	for (i = 0; i < size; i++) {
+		
+		printf("+----");
+	}
 	printf("+\n");
 
-	for (i = 0; i < 8; i++)
+	for (i = 0; i < size; i++)
 	{
-		for (j = 0; j < 8; j++)
+		printf("%d",i);
+		if (i < 10)printf(" ");
+		for (j = 0; j < size; j++)
 		{
-			printf("| . ");
+			
+			printf("| .. ");
 		}
 		printf("|\n");
-		for (k = 0; k < 8; k++)
-			printf("+---");
+		printf("  ");
+		for (k = 0; k < size; k++) {
+			
+			printf("+----");
+
+		}
+			
 
 		printf("+\n");
 	}
+	
 
 }
 
 
 
-void game16x16() {
-
-	int i, j, k;
-	mines = 40;
-
-	for (i = 0; i < 16; i++)
-		printf("+---");
-	printf("+\n");
-
-	for (i = 0; i < 16; i++)
-	{
-		for (j = 0; j < 16; j++)
-		{
-			printf("| . ");
-		}
-		printf("|\n");
-		for (k = 0; k < 16; k++)
-			printf("+---");
-
-		printf("+\n");
-	}
-}
