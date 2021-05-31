@@ -51,14 +51,14 @@ void menu() { // Izbornik
 		//provjera izlaza!
 		do {
 			printf("\nZelite izaci?(da/ne):");
-			fgets(exitCheck, sizeof(exitCheck), stdin);
+			fgets(exitCheck,3,stdin);
 
-			if (strcmp(exitCheck, "da") == 1 || strcmp(exitCheck, "ne") == 1) printf("Unos nije tocan pokusajte opet!");
-		} while (strcmp(exitCheck, "ne") == 1 || strcmp(exitCheck, "da") == 1);
+			if (strcmp(exitCheck, "ne") == 0 || strcmp(exitCheck, "da") == 0) printf("Unos nije tocan pokusajte opet!");
+		} while (strcmp(exitCheck, "ne") == 0 || strcmp(exitCheck, "da") == 0);
 
 		//provjera odabrane opcije!
-		if (strcmp(exitCheck, "da") == 0) break;
-		if (strcmp(exitCheck, "ne") == 0) {
+		if (strcmp(exitCheck, "da") == 1) break;
+		if (strcmp(exitCheck, "ne") == 1) {
 			system("cls");
 			menu();
 			break;
@@ -144,8 +144,16 @@ void boardGenerate() {
 
 		i = rand() % size;
 		j = rand() % size;
-		field[i][j] = 66;
-		minesCheck++;
+		if (field[i][j] == 66) {
+			i = rand() % size;
+			j = rand() % size;
+		}
+		else {
+			field[i][j] = 66;
+
+			minesCheck++;
+		}
+		
 		
 	} while (minesCheck != mines);
 
@@ -239,23 +247,6 @@ void boardGuess() {
 
 }
 
-
-void win() {
-	char check[3];
-	printf("Pobjeda!");
-	do {
-		printf("\nZelite odigrati jos jednu igru?(da/ne)");
-		fgets(check, sizeof(check), stdin);
-		if (strcmp(check, "da") == 1 || strcmp(check, "ne") == 1) printf("Unos nije tocan pokusajte opet!");
-	} while (strcmp(check, "ne") == 1 || strcmp(check, "da") == 1);
-
-	if (strcmp(check, "da") == 0) boardDifficulty();
-	if (strcmp(check, "ne") == 0) {
-		exit(EXIT_FAILURE);
-	}
-	
-}
-
 void boardMatch(int x, int y) {
 	if (field[x][y] == 66) {
 		fieldUser[x][y] = field[x][y];
@@ -272,6 +263,24 @@ void boardMatch(int x, int y) {
 		boardPrint(x,y);
 	}
 }
+
+void win() {
+	char check[3];
+	printf("Pobjeda!");
+	do {
+		printf("\nZelite odigrati jos jednu igru?(da/ne)");
+		fgets(stdin, 3, check);
+		if (strcmp(check, "da") == 1 || strcmp(check, "ne") == 1) printf("Unos nije tocan pokusajte opet!");
+	} while (strcmp(check, "ne") == 1 || strcmp(check, "da") == 1);
+
+	if (strcmp(check, "da") == 0) boardDifficulty();
+	if (strcmp(check, "ne") == 0) {
+		exit(EXIT_FAILURE);
+	}
+	
+}
+
+
 
 
 void finalBoard() {
@@ -300,7 +309,7 @@ void finalBoard() {
 		if (i < 10)printf(" ");
 		for (j = 0; j < size; j++)
 		{
-			printf("|  %c%c ", fieldUser[i][j], fieldUser[i][j]);
+			printf("| %c%c ", fieldUser[i][j], fieldUser[i][j]);
 
 		}
 		printf("|\n");
@@ -412,15 +421,17 @@ void endGame() {
 	printf("\nPolje koje ste odabrali sadrzava minu! Igra je zavrsena!");
 	//printf("Vas score je %d",vrijeme);
 	do {
-		printf("\nZelite odigrati jos jednu igru?(da/ne)");
-		fgets(check, sizeof(check), stdin);
+		printf("\nZelite odigrati jos jednu igru?(da/ne):");
+		fgets(stdin, 3, check);
+
 		if (strcmp(check, "da") == 1 || strcmp(check, "ne") == 1) printf("Unos nije tocan pokusajte opet!");
 	} while (strcmp(check, "ne") == 1 || strcmp(check, "da") == 1);
 
+	//provjera odabrane opcije!
 	if (strcmp(check, "da") == 0) boardDifficulty();
-	if (strcmp(check, "ne") == 0) {
-		exit(EXIT_FAILURE);
-	}
-	
+	if (strcmp(check, "ne") == 0) return 0;
+		
+
 }
+	
 
