@@ -55,7 +55,7 @@ void menu() { // Izbornik
 
 			if (strcmp(exitCheck, "ne") == 0 || strcmp(exitCheck, "da") == 0) printf("Unos nije tocan pokusajte opet!");
 		} while (strcmp(exitCheck, "ne") == 0 || strcmp(exitCheck, "da") == 0);
-
+//ispraviti prvojeru stringova za sve izlaze!!
 		//provjera odabrane opcije!
 		if (strcmp(exitCheck, "da") == 1) break;
 		if (strcmp(exitCheck, "ne") == 1) {
