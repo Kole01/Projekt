@@ -16,7 +16,7 @@ int field[20][20];
 int score=0;
 int size = 0;
 int debug = 1;
-
+int scoreMultiplier = 0;
 
 void menu() { // Izbornik
 	system("cls");
@@ -99,7 +99,7 @@ void boardDifficulty() {
 	case 1:
 		mines = 10;
 		size = 8;
-
+		scoreMultiplier = 1;
 		boardGenerate();
 		boardPrintBlank();
 		boardGuess();
@@ -107,6 +107,7 @@ void boardDifficulty() {
 		break;
 
 	case 2:
+		scoreMultiplier = 2;
 		size = 16;
 		mines = 40;
 		boardGenerate();
