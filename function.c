@@ -7,17 +7,22 @@
 #include <conio.h>
 
 
+
+
 int id = 0;
 int mines = 0;
 int fieldUser[20][20];
 int field[20][20];
+int score=0;
 int size = 0;
 int debug = 1;
 
-void menu() { // Izbornik
 
+void menu() { // Izbornik
+	system("cls");
 	int choice;
 	char exitCheck[3];
+	int temp;
 
 	//Printanje izbornika!
 	printf("\n");
@@ -47,22 +52,25 @@ void menu() { // Izbornik
 		break;
 
 	case 3://Izlaz iz programa!
-
-		//provjera izlaza!
+		printf("Zelite izaci?");
 		do {
-			printf("\nZelite izaci?(da/ne):");
-			fgets(exitCheck,3,stdin);
+			scanf("%2s", exitCheck);
+			if (strcmp(exitCheck, "da") == 1 && strcmp(exitCheck, "ne") == 1) printf("\nUnos nije dobar\n");
 
-			if (strcmp(exitCheck, "ne") == 0 || strcmp(exitCheck, "da") == 0) printf("Unos nije tocan pokusajte opet!");
-		} while (strcmp(exitCheck, "ne") == 0 || strcmp(exitCheck, "da") == 0);
-//ispraviti prvojeru stringova za sve izlaze!!
-		//provjera odabrane opcije!
-		if (strcmp(exitCheck, "da") == 1) break;
-		if (strcmp(exitCheck, "ne") == 1) {
-			system("cls");
+		} while (strcmp(exitCheck, "da") == 1 && strcmp(exitCheck, "ne") == 1);
+
+		if (strcmp(exitCheck, "da") == 0) {
+			temp = 0;
+			
+		}
+		else temp = 1;
+
+		switch (temp) {
+		case 1:
 			menu();
 			break;
-
+		case 0:
+			exit(EXIT_FAILURE);
 		}
 	}
 
@@ -210,7 +218,7 @@ void boardGuess() {
 	int x, y;
 	int i, j;
 	int match=0;
-	int debugMines = 0;
+	
 
 	for (i = 0; i < size; i++) {
 		for (j = 0; j < size; j++) {
@@ -222,23 +230,15 @@ void boardGuess() {
 
 
 	do { // korisnik odabire koje polje ce se pogledati!
-		printf("\nZadaj koordinatu x: ");
+		printf("\n");
+		printf("Zadaj koordinatu x: ");
 		scanf("%d", &x);
-		printf("\nZadaj koordinatu y: ");
+		
+		printf("Zadaj koordinatu y: ");
 		scanf("%d", &y);
 		if (x<0 || (x>size - 1) && y<0 || y>size - 1) printf("\nUnesena vrijednost nije ispravana, unesite valjane koordiante!");
 	}while (x<0 || x>size-1 && y<0 || y>size-1);
-	if (debug == 1) {
-		for (i = 0; i < size; i++) {
-			for (j = 0; j < size; j++) {
-				if (field[i][j] == 66) {
-					debugMines++;
-					printf("\n%d. mina se nalazi na: %d,%d", debugMines, i, j);
-
-				}
-			}
-		}
-	}
+	
 	
 	boardMatch(x, y);
 
@@ -248,6 +248,7 @@ void boardGuess() {
 }
 
 void boardMatch(int x, int y) {
+	
 	if (field[x][y] == 66) {
 		fieldUser[x][y] = field[x][y];
 		finalBoard();
@@ -260,21 +261,70 @@ void boardMatch(int x, int y) {
 	}
 	else {
 		fieldUser[x][y] = field[x][y];
+		if (field[x][y] == 48) {
+
+		
+		//polja iznad odabranog polja
+				if (field[x - 1][y - 1] == field[x][y])
+				{
+					fieldUser[x-1][y-1] = field[x - 1][y - 1];
+				}
+				if (field[x - 1][y] == field[x][y])
+				{
+					fieldUser[x - 1][y] = field[x - 1][y];
+				}
+				if (field[x - 1][y + 1] == field[x][y])
+				{
+					fieldUser[x - 1][y + 1] = field[x - 1][y + 1];
+				}
+				//polja u ravnini zadanog polja
+				if (field[x][y - 1] == field[x][y])
+				{
+					fieldUser[x][y - 1] = field[x][y - 1];
+				}
+				if (field[x][y + 1] == field[x][y])
+				{
+					fieldUser[x][y + 1] = field[x ][y + 1];
+				}
+				//polja ispod odabrnog polja 
+				if (field[x + 1][y - 1] == field[x][y])
+				{
+					fieldUser[x + 1][y - 1] = field[x + 1][y - 1];
+				}
+				if (field[x + 1][y] == field[x][y])
+				{
+					fieldUser[x + 1][y] = field[x + 1][y];
+				}
+				if (field[x + 1][y + 1] == field[x][y])
+				{
+					fieldUser[x + 1][y + 1] = field[x + 1][y + 1];
+				}
+		}
 		boardPrint(x,y);
 	}
 }
 
 void win() {
 	char check[3];
+	int temp;
 	printf("Pobjeda!");
+	printf("\nZelite li odigrati jos jednu igru?");
 	do {
-		printf("\nZelite odigrati jos jednu igru?(da/ne)");
-		fgets(stdin, 3, check);
-		if (strcmp(check, "da") == 1 || strcmp(check, "ne") == 1) printf("Unos nije tocan pokusajte opet!");
-	} while (strcmp(check, "ne") == 1 || strcmp(check, "da") == 1);
+		scanf("%2s", check);
+		if (strcmp(check, "da") == 1 && strcmp(check, "ne") == 1) printf("\nUnos nije dobar\n");
 
-	if (strcmp(check, "da") == 0) boardDifficulty();
-	if (strcmp(check, "ne") == 0) {
+	} while (strcmp(check, "da") == 1 && strcmp(check, "ne") == 1);
+
+	if (strcmp(check, "da") == 0) {
+		temp = 1;
+	}
+	else temp = 0;
+
+	switch (temp) {
+	case 1:
+		boardDifficulty();
+		break;
+	case 0:
 		exit(EXIT_FAILURE);
 	}
 	
@@ -286,7 +336,7 @@ void win() {
 void finalBoard() {
 	int i = 0, j = 0, k = 0;
 	printf("\n");
-
+	system("cls");
 	for (i = 0; i < size; i++) {
 
 		if (i < 9)printf("    %d", i);
@@ -309,7 +359,7 @@ void finalBoard() {
 		if (i < 10)printf(" ");
 		for (j = 0; j < size; j++)
 		{
-			printf("| %c%c ", fieldUser[i][j], fieldUser[i][j]);
+			printf("|  %c ", fieldUser[i][j], fieldUser[i][j]);
 
 		}
 		printf("|\n");
@@ -323,15 +373,29 @@ void finalBoard() {
 
 		printf("+\n");
 	}
-	endGame();
 }
 
 //Pritntanje polja s odabranim poljima
 
 void boardPrint(int x, int y) {
 	int i = 0, j = 0, k = 0;
+	int debugMines=0;
 	printf("\n");
+	system("cls");
+	if (debug == 1) {
+		for (i = 0; i < size; i++) {
+			for (j = 0; j < size; j++) {
+				if (field[i][j] == 66) {
+					debugMines++;
+					printf("%d. mina se nalazi na: %d,%d\n", debugMines, i, j);
 
+				}
+			}
+		}
+	}
+	printf("\n");
+	printf("\n");
+	printf("\n");
 	for (i = 0; i < size; i++) {
 
 		if (i < 9)printf("    %d", i);
@@ -354,7 +418,7 @@ void boardPrint(int x, int y) {
 		if (i < 10)printf(" ");
 		for (j = 0; j < size; j++)
 		{
-			printf("| %c%c ", fieldUser[i][j], fieldUser[i][j]);
+			printf("|  %c ", fieldUser[i][j], fieldUser[i][j]);
 			
 		}
 		printf("|\n");
@@ -400,7 +464,7 @@ void boardPrintBlank() { //pritanje igre
 		for (j = 0; j < size; j++)
 		{
 
-			printf("| -- ");
+			printf("|  - ");
 		}
 		printf("|\n");
 		printf("  ");
@@ -417,21 +481,31 @@ void boardPrintBlank() { //pritanje igre
 }
 
 void endGame() {
+
 	char check[3];
+	int temp;
 	printf("\nPolje koje ste odabrali sadrzava minu! Igra je zavrsena!");
-	//printf("Vas score je %d",vrijeme);
+	printf("\nZelite li odigrati jos jednu igru?");
 	do {
-		printf("\nZelite odigrati jos jednu igru?(da/ne):");
-		fgets(stdin, 3, check);
+		scanf("%2s", check);
+		if (strcmp(check,"da")==1 && strcmp(check, "ne") == 1) printf("\nUnos nije dobar\n");
 
-		if (strcmp(check, "da") == 1 || strcmp(check, "ne") == 1) printf("Unos nije tocan pokusajte opet!");
-	} while (strcmp(check, "ne") == 1 || strcmp(check, "da") == 1);
+	} while (strcmp(check, "da") == 1 && strcmp(check, "ne") == 1);
 
-	//provjera odabrane opcije!
-	if (strcmp(check, "da") == 0) boardDifficulty();
-	if (strcmp(check, "ne") == 0) return 0;
-		
-
+	if (strcmp(check, "da") == 0) {
+		temp = 1;
+	}
+	else temp = 0;
+	
+	switch (temp) {
+	case 1:
+		boardDifficulty();
+		break;
+	case 0:
+		exit(EXIT_FAILURE);
+	}
+	
+	
 }
 	
 
