@@ -9,7 +9,7 @@
 
 
 
-int id = 0;
+static int id = 0;
 int mines = 0;
 int fieldUser[20][20];
 int field[20][20];
@@ -334,7 +334,7 @@ void win() {
 	total = end - start;
 	timeInSeconds = total / CLOCKS_PER_SEC;
 	score += timeInSeconds * 10;
-	printf("Za igru vam je trebalo %d", timeInSeconds);
+	printf("Za igru vam je trebalo %d sekundi", timeInSeconds);
 	writeFile();
 	printf("\nZelite li odigrati jos jednu igru?");
 	do {
@@ -387,7 +387,7 @@ void finalBoard() {
 		if (i < 10)printf(" ");
 		for (j = 0; j < size; j++)
 		{
-			printf("|  %c ", fieldUser[i][j], fieldUser[i][j]);
+			printf("|  %c ", fieldUser[i][j]);
 
 		}
 		printf("|\n");
@@ -446,7 +446,7 @@ void boardPrint(int x, int y) {
 		if (i < 10)printf(" ");
 		for (j = 0; j < size; j++)
 		{
-			printf("|  %c ", fieldUser[i][j], fieldUser[i][j]);
+			printf("|  %c ", fieldUser[i][j]);
 
 		}
 		printf("|\n");
@@ -512,8 +512,8 @@ void endGame() {
 
 	char check[3];
 	int temp;
-	score += timeInSeconds * 10;
-	printf("Za igru vam je trebalo %d", timeInSeconds);
+	score += (timeInSeconds * 10);
+	printf("\nZa igru vam je trebalo %d sekudni", timeInSeconds);
 	printf("\nPolje koje ste odabrali sadrzava minu! Igra je zavrsena!");
 	writeFile();
 	printf("\nZelite li odigrati jos jednu igru?");
@@ -556,23 +556,29 @@ void menuScores() {
 	do {
 		printf("Odaberite opciju:");
 		scanf("%d", &choice);
-		if (choice < 1 || choice>5) printf("Unos nije ispravan!");
-	} while (choice < 1 || choice>5);
+		if (choice < 1 || choice>4) printf("Unos nije ispravan!");
+	} while (choice < 1 || choice>4);
 
 	// izbor!
 	switch (choice) {
 	case 1:
+		fileOpening();
+		loadFile();
 		sort();
 		outputFile();
-		break;
+		exit(EXIT_FAILURE);
 
 	case 2:
+		fileOpening();
+		sort();
 		deleteSpecificScore();
-		break;
+		sort();
+		exit(EXIT_FAILURE);
 
 	case 3:
+		fileOpening();
 		deleteScores();
-		break;
+		exit(EXIT_FAILURE);
 
 	case 4:
 
@@ -588,23 +594,24 @@ void menuScores() {
 
 
 void fileOpening() {
-	FILE* file = fopen("C:\\Users\\Mihael\\Downloads\\Projekt-main\\Projekt-main\\scores.bin", "ab+");
-	fwrite(&id, sizeof(int), 1, file);
+	FILE* file = fopen("scores.bin", "wb");
 	if (file == NULL) {
-		perror("Kreiranje datoteke scores.bin");
+		perror("Kreiranje datoteke studenti.bin");
 		exit(EXIT_FAILURE);
 	}
+	fwrite(&id, sizeof(int), 1, file);
 	fclose(file);
+
 }
 
 void loadFile() {
-	FILE* file = fopen("C:\\Users\\Mihael\\Downloads\\Projekt-main\\Projekt-main\\scores.bin", "rb");
+	FILE* file = fopen("scores.bin", "ab+");
 	if (file == NULL) {
 		perror("Ucitavanje rezultata");
 		return NULL;
 	}
 	fread(&id, sizeof(int), 1, file);
-	printf("Broj Clanova: %d\n", id);
+	printf("Broj rezultata: %d\n", id);
 	userField = (PLAYER*)calloc(id, sizeof(PLAYER));
 	if (userField == NULL) {
 		perror("Zauzimanje memorije za rezultate");
@@ -614,22 +621,21 @@ void loadFile() {
 
 
 void writeFile() {
-	char tempUsername[30];
 	fileOpening();
-	FILE* file = fopen("C:\\Users\\Mihael\\Downloads\\Projekt-main\\Projekt-main\\scores.bin", "rb+");
+	FILE* file = fopen("scores.bin", "rb+");
 	if (file == NULL) {
-		perror("Kreiranje datoteke scores.bin");
+		perror("Dodavanje rezultata u scores.bin");
 		exit(EXIT_FAILURE);
 	}
-
-	PLAYER* temp={ 0 };
-	temp=(PLAYER*)calloc(1, sizeof(PLAYER));
 	fread(&id, sizeof(int), 1, file);
-	temp->id = id;
-	printf("\nNapisite svoj username!");
-	scanf("%29s", temp->username);
-	temp->score = score * scoreMultiplier;
-	temp->time = timeInSeconds;
+	printf("Broj ideova: %d\n",id );
+	PLAYER temp = { 0 };
+	temp.id = id;
+	getchar();
+	printf("Unesite username!\n");
+	scanf("%19[^\n]s", temp.username);
+	temp.score = score;
+	temp.timeNedded = timeInSeconds;
 	fseek(file, sizeof(PLAYER) * id, SEEK_CUR);
 	fwrite(&temp, sizeof(PLAYER), 1, file);
 	rewind(file);
@@ -641,7 +647,7 @@ void writeFile() {
 
 void outputFile() {
 	int i;
-	FILE* file = fopen("C:\\Users\\Mihael\\Downloads\\Projekt-main\\Projekt-main\\scores.bin", "rb+");
+	FILE* file = fopen("scores.bin", "ab+");
 	if (file == NULL) {
 		perror("Kreiranje datoteke scores.bin");
 		exit(EXIT_FAILURE);
@@ -649,27 +655,27 @@ void outputFile() {
 	fread(userField, sizeof(PLAYER), id, file);
 	if (id < 10) {
 		for (i = 0; i < id; i++) {
-			printf("ID:%d ,Username:%s, Score:%d, Vrijeme:%d\n", (userField + i)->id, (userField + i)->username, (userField + i)->score, (userField + i)->time);
+			printf("ID:%d ,Username:%s, Score:%d, Vrijeme:%d\n", (userField + i)->id, (userField + i)->username, (userField + i)->score, (userField + i)->timeNedded);
 		}
 	}
 	else {
 		for (i = 0; i < 10; i++) {
-			printf("ID:%d ,Username:%s, Score:%d, Vrijeme:%d\n", (userField + i)->id, (userField + i)->username, (userField + i)->score, (userField + i)->time);
+			printf("ID:%d ,Username:%s, Score:%d, Vrijeme:%d\n", (userField + i)->id, (userField + i)->username, (userField + i)->score, (userField + i)->timeNedded);
 		}
 	}
 	fclose(file);
 }
 
 void deleteSpecificScore() {
-	FILE* file = fopen("C:\\Users\\Mihael\\Downloads\\Projekt-main\\Projekt-main\\scores.bin", "wb");
-	FILE* temp = fopen("C:\\Users\\Mihael\\Downloads\\Projekt-main\\Projekt-main\\temp.bin", "wb");
+	FILE* file = fopen("scores.bin", "ab+");
+	FILE* temp = fopen("temp.bin", "ab+");
 	int i;
 	int n;
 	int found;
 	do {
 		printf("Zadaj id kojeg zelis obrisati!");
 		scanf("%d", &n);
-		if (n > id)printf("NEma toliko unesenih rezultata");
+		if (n > id)printf("Nema toliko unesenih rezultata");
 	} while (n > id);
 	for (i = 0; i < id; i++) {
 		if ((userField + i)->id != n) {
@@ -683,19 +689,19 @@ void deleteSpecificScore() {
 
 	fclose(file);
 	fclose(temp);
-	remove("C:\\Users\\Mihael\\Downloads\\Projekt-main\\Projekt-main\\scores.bin");
-	rename("C:\\Users\\Mihael\\Downloads\\Projekt-main\\Projekt-main\\temp.bin", "C:\\Users\\Mihael\\Downloads\\Projekt-main\\Projekt-main\\scores.bin");
+	remove("scores.bin");
+	rename("temp.bin", "scores.bin");
 }
 
 
 void deleteScores() {
-	FILE* file = fopen("C:\\Users\\Mihael\\Downloads\\Projekt-main\\Projekt-main\\scores.bin", "rb");
-	FILE* temp = fopen("C:\\Users\\Mihael\\Downloads\\Projekt-main\\Projekt-main\\temp.bin", "wb");
+	FILE* file = fopen("scores.bin", "ab+");
+	FILE* temp = fopen("C:temp.bin", "ab+");
 	
 	fclose(file);
 	fclose(temp);
-	remove("C:\\Users\\Mihael\\Downloads\\Projekt-main\\Projekt-main\\scores.bin");
-	rename("C:\\Users\\Mihael\\Downloads\\Projekt-main\\Projekt-main\\temp.bin", "C:\\Users\\Mihael\\Downloads\\Projekt-main\\Projekt-main\\scores.bin");
+	remove("scores.bin");
+	rename("temp.bin", "scores.bin");
 }
 
 void change(int* const veci, int* const manji) {
@@ -705,7 +711,8 @@ void change(int* const veci, int* const manji) {
 	*veci = temp;
 }
 void sort() {
-	FILE* temp = fopen("C:\\Users\\Mihael\\Downloads\\Projekt-main\\Projekt-main\\temp.bin", "wb");
+	FILE* temp = fopen("temp.bin", "ab+");
+	FILE* file = fopen("scores.bin", "ab+");
 	int min = -1;
 	int i, j;
 	for (i = 0; i < id - 1; i++)
@@ -724,7 +731,8 @@ void sort() {
 	for (i = 0; i < id; i++) {
 		fwrite(&userField + i, sizeof(PLAYER), 1, temp);
 	}
-	fclose("C:\\Users\\Mihael\\Downloads\\Projekt-main\\Projekt-main\\temp.bin");
-	remove("C:\\Users\\Mihael\\Downloads\\Projekt-main\\Projekt-main\\scores.bin");
-	rename("C:\\Users\\Mihael\\Downloads\\Projekt-main\\Projekt-main\\temp.bin", "C:\\Users\\Mihael\\Downloads\\Projekt-main\\Projekt-main\\scores.bin");
+	fclose(temp);
+	fclose(file);
+	remove("scores.bin");
+	rename("temp.bin", "scores.bin");
 }
