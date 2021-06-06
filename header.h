@@ -5,7 +5,7 @@ typedef struct player {
 	int id;
 	char username[20];
 	int score;
-	float time;
+	int timeNedded;
 
 }PLAYER;
 
