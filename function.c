@@ -13,12 +13,9 @@ static int id = 0;
 int mines = 0;
 int fieldUser[20][20];
 int field[20][20];
-int score = 0;
 int size = 0;
 int debug = 1;
 int scoreMultiplier = 0;
-int timeInSeconds;
-clock_t start, end, total;
 PLAYER* userField;
 
 
@@ -84,6 +81,8 @@ void menu() { // Izbornik
 void boardDifficulty() {
 	system("cls");
 	int choice;
+	int score=0, timeInSeconds;
+	clock_t start, end, total;
 	//Printanje podizbornika!
 	printf("\n");
 	printf("\nOdaberite tezinu igre!\n");
@@ -105,10 +104,23 @@ void boardDifficulty() {
 		mines = 10;
 		size = 8;
 		scoreMultiplier = 1;
+		start = clock();
 		boardGenerate();
 		boardPrintBlank();
-		start = clock();
-		boardGuess();
+		if ( boardGuess(score)==1) {
+			end = clock();
+			total = end - start;
+			timeInSeconds = total / CLOCKS_PER_SEC;
+			finalBoard();
+			endGame(score,timeInSeconds);
+		}
+		if (boardGuess(score) == 2) {
+			end = clock();
+			total = end - start;
+			timeInSeconds = total / CLOCKS_PER_SEC;
+			win(score,timeInSeconds);
+			
+		}
 
 		break;
 
@@ -116,11 +128,23 @@ void boardDifficulty() {
 		scoreMultiplier = 2;
 		size = 16;
 		mines = 40;
+		start = clock();
 		boardGenerate();
 		boardPrintBlank();
-		start = clock();
-		boardGuess();
-		break;
+		if (boardGuess(score) == 1) {
+			end = clock();
+			total = end - start;
+			timeInSeconds = total / CLOCKS_PER_SEC;
+			finalBoard();
+			endGame(score,timeInSeconds);
+		}
+		if (boardGuess(score) == 2) {
+			end = clock();
+			total = end - start;
+			timeInSeconds = total / CLOCKS_PER_SEC;
+			win(score, timeInSeconds);
+
+		}
 
 	case 3:
 
@@ -131,7 +155,6 @@ void boardDifficulty() {
 
 
 }
-
 
 void boardGenerate() {
 	srand(time(NULL));
@@ -218,11 +241,7 @@ void boardGenerate() {
 	}
 }
 
-
-
-
-
-void boardGuess() {
+int boardGuess(int score) {
 	int x, y;
 	int i, j;
 	int match = 0;
@@ -233,7 +252,7 @@ void boardGuess() {
 			if (fieldUser[i][j] == field[i][j]) match++;
 		}
 	}
-	if (match == (size * size) - mines) win();
+	if (match == (size * size) - mines) return 2;
 
 
 
@@ -248,28 +267,25 @@ void boardGuess() {
 	} while (x<0 || x>size - 1 && y<0 || y>size - 1);
 
 
-	boardMatch(x, y);
+	boardMatch(x, y,score);
 
 
 
 
 }
 
-void boardMatch(int x, int y) {
-	
+int boardMatch(int x, int y, int score) {
+
 
 
 	if (field[x][y] == 66) {
 		fieldUser[x][y] = field[x][y];
-		end = clock();
-		total = end - start;
-		timeInSeconds = total / CLOCKS_PER_SEC;
-		finalBoard();
-		endGame();
+		return 1;
+		
 	}
 	if (fieldUser[x][y] != 45) {
 		printf("Odabrali ste polje koje je vec otkriveno!");
-		boardGuess();
+		boardGuess(score);
 
 	}
 	else {
@@ -322,20 +338,17 @@ void boardMatch(int x, int y) {
 				score += 10;
 			}
 		}
-		boardPrint(x, y);
+		boardPrint(x, y,score);
 	}
 }
 
-void win() {
+void win(int score, int timeInSeconds) {
 	char check[3];
 	int temp;
 	printf("Pobjeda!");
-	end = clock();
-	total = end - start;
-	timeInSeconds = total / CLOCKS_PER_SEC;
 	score += timeInSeconds * 10;
 	printf("Za igru vam je trebalo %d sekundi", timeInSeconds);
-	writeFile();
+	writeFile(score,timeInSeconds);
 	printf("\nZelite li odigrati jos jednu igru?");
 	do {
 		scanf("%2s", check);
@@ -357,9 +370,6 @@ void win() {
 	}
 
 }
-
-
-
 
 void finalBoard() {
 	int i = 0, j = 0, k = 0;
@@ -387,8 +397,9 @@ void finalBoard() {
 		if (i < 10)printf(" ");
 		for (j = 0; j < size; j++)
 		{
-			printf("|  %c ", fieldUser[i][j]);
-
+			
+			if(field[i][j]==66)printf("|  %c ", field[i][j]);
+			else printf("|  %c ", fieldUser[i][j]);
 		}
 		printf("|\n");
 		printf("  ");
@@ -405,7 +416,7 @@ void finalBoard() {
 
 //Pritntanje polja s odabranim poljima
 
-void boardPrint(int x, int y) {
+void boardPrint(int x, int y, int score) {
 	int i = 0, j = 0, k = 0;
 	int debugMines = 0;
 	printf("\n");
@@ -460,9 +471,8 @@ void boardPrint(int x, int y) {
 
 		printf("+\n");
 	}
-	boardGuess();
+	boardGuess(score);
 }
-
 
 void boardPrintBlank() { //pritanje igre
 	system("cls");
@@ -505,17 +515,16 @@ void boardPrintBlank() { //pritanje igre
 
 		printf("+\n");
 	}
-	boardGuess();
 }
 
-void endGame() {
+void endGame(int score, int timeInSeconds) {
 
 	char check[3];
 	int temp;
 	score += (timeInSeconds * 10);
 	printf("\nZa igru vam je trebalo %d sekudni", timeInSeconds);
 	printf("\nPolje koje ste odabrali sadrzava minu! Igra je zavrsena!");
-	writeFile();
+	writeFile(score,timeInSeconds);
 	printf("\nZelite li odigrati jos jednu igru?");
 	do {
 		scanf("%2s", check);
@@ -540,7 +549,6 @@ void endGame() {
 
 }
 
-
 void menuScores() {
 	int choice;
 	//Printanje podizbornika!
@@ -562,14 +570,11 @@ void menuScores() {
 	// izbor!
 	switch (choice) {
 	case 1:
-		fileOpening();
-		loadFile();
 		sort();
 		outputFile();
 		exit(EXIT_FAILURE);
 
 	case 2:
-		fileOpening();
 		sort();
 		deleteSpecificScore();
 		sort();
@@ -591,68 +596,69 @@ void menuScores() {
 }
 
 
-
-
 void fileOpening() {
-	FILE* file = fopen("scores.bin", "wb");
+	FILE* file = fopen("scores.txt", "w");
 	if (file == NULL) {
-		perror("Kreiranje datoteke studenti.bin");
+		perror("Kreiranje datoteke studenti.txt");
 		exit(EXIT_FAILURE);
 	}
-	fwrite(&id, sizeof(int), 1, file);
+	fprintf(file, "%d",id);
 	fclose(file);
 
 }
 
+
 void loadFile() {
-	FILE* file = fopen("scores.bin", "ab+");
+	FILE* file = fopen("scores.txt", "r");
 	if (file == NULL) {
 		perror("Ucitavanje rezultata");
 		return NULL;
 	}
-	fread(&id, sizeof(int), 1, file);
-	printf("Broj rezultata: %d\n", id);
-	userField = (PLAYER*)calloc(id, sizeof(PLAYER));
+	userField = (PLAYER*)calloc(1, sizeof(PLAYER));
 	if (userField == NULL) {
 		perror("Zauzimanje memorije za rezultate");
 		return NULL;
 	}
+
 }
 
 
-void writeFile() {
+void writeFile(int score, int timeInSeconds) {
 	fileOpening();
-	FILE* file = fopen("scores.bin", "rb+");
+	loadFile();
+	FILE* file = fopen("scores.txt", "rb+");
 	if (file == NULL) {
-		perror("Dodavanje rezultata u scores.bin");
+		perror("Dodavanje rezultata u scores.txt");
 		exit(EXIT_FAILURE);
 	}
-	fread(&id, sizeof(int), 1, file);
-	printf("Broj ideova: %d\n",id );
+	fscanf(file,"%d",&id);
+	printf("Broj ideova: %d\n", id);
 	PLAYER temp = { 0 };
 	temp.id = id;
 	getchar();
 	printf("Unesite username!\n");
-	scanf("%19[^\n]s", temp.username);
+	scanf("%19[^\n]", temp.username);
 	temp.score = score;
 	temp.timeNedded = timeInSeconds;
-	fseek(file, sizeof(PLAYER) * id, SEEK_CUR);
-	fwrite(&temp, sizeof(PLAYER), 1, file);
-	rewind(file);
+	//fseek(file, sizeof(PLAYER) * id, SEEK_CUR);
+	fprintf(file,"%d\t%s\t%d\t%d\n",temp.id,temp.username,temp.score,temp.timeNedded);
+	//rewind(file);
 	id++;
-	fwrite(&id, sizeof(int), 1, file);
+	free(userField);
+	fprintf(file,"%d",id);
 	fclose(file);
-
 }
+
 
 void outputFile() {
 	int i;
-	FILE* file = fopen("scores.bin", "ab+");
+	FILE* file = fopen("scores.txt", "a+");
+	printf("test1");
 	if (file == NULL) {
-		perror("Kreiranje datoteke scores.bin");
+		perror("Kreiranje datoteke scores.txt");
 		exit(EXIT_FAILURE);
 	}
-	fread(userField, sizeof(PLAYER), id, file);
+	fscanf(file,"%d",&userField->id);
 	if (id < 10) {
 		for (i = 0; i < id; i++) {
 			printf("ID:%d ,Username:%s, Score:%d, Vrijeme:%d\n", (userField + i)->id, (userField + i)->username, (userField + i)->score, (userField + i)->timeNedded);
@@ -663,12 +669,15 @@ void outputFile() {
 			printf("ID:%d ,Username:%s, Score:%d, Vrijeme:%d\n", (userField + i)->id, (userField + i)->username, (userField + i)->score, (userField + i)->timeNedded);
 		}
 	}
+	printf("test1");
+	free(userField);
 	fclose(file);
 }
 
+
 void deleteSpecificScore() {
-	FILE* file = fopen("scores.bin", "ab+");
-	FILE* temp = fopen("temp.bin", "ab+");
+	FILE* file = fopen("scores.txt", "ab+");
+	FILE* temp = fopen("temp.txt", "ab+");
 	int i;
 	int n;
 	int found;
@@ -689,20 +698,23 @@ void deleteSpecificScore() {
 
 	fclose(file);
 	fclose(temp);
-	remove("scores.bin");
-	rename("temp.bin", "scores.bin");
+	free(userField);
+	remove("scores.txt");
+	rename("temp.txt", "scores.txt");
 }
 
 
 void deleteScores() {
-	FILE* file = fopen("scores.bin", "ab+");
-	FILE* temp = fopen("C:temp.bin", "ab+");
-	
+	FILE* file = fopen("scores.txt", "ab+");
+	FILE* temp = fopen("C:temp.txt", "ab+");
+
 	fclose(file);
 	fclose(temp);
-	remove("scores.bin");
-	rename("temp.bin", "scores.bin");
+	free(userField);
+	remove("scores.txt");
+	rename("temp.txt", "scores.txt");
 }
+
 
 void change(int* const veci, int* const manji) {
 	int temp = 0;
@@ -710,9 +722,11 @@ void change(int* const veci, int* const manji) {
 	*manji = *veci;
 	*veci = temp;
 }
+
+
 void sort() {
-	FILE* temp = fopen("temp.bin", "ab+");
-	FILE* file = fopen("scores.bin", "ab+");
+	FILE* temp = fopen("temp.txt", "ab+");
+	FILE* file = fopen("scores.txt", "ab+");
 	int min = -1;
 	int i, j;
 	for (i = 0; i < id - 1; i++)
@@ -720,11 +734,11 @@ void sort() {
 		min = i;
 		for (j = i + 1; j < id; j++)
 		{
-			if ((userField+j)->score < (userField+min)->score) {
+			if ((userField + j)->score < (userField + min)->score) {
 				min = j;
 			}
 		}
-		change(&(userField+j)->score, &(userField+min)->score);
+		change(&(userField + j)->score, &(userField + min)->score);
 	}
 
 
@@ -733,6 +747,7 @@ void sort() {
 	}
 	fclose(temp);
 	fclose(file);
-	remove("scores.bin");
-	rename("temp.bin", "scores.bin");
+	free(userField);
+	remove("scores.txt");
+	rename("temp.txt", "scores.txt");
 }
