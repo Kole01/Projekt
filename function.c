@@ -9,14 +9,14 @@
 
 
 
-static int id = 0;
+static int idbroj = 0;
 int mines = 0;
 int fieldUser[20][20];
 int field[20][20];
 int size = 0;
 int debug = 1;
 int scoreMultiplier = 0;
-PLAYER* userField;
+
 
 
 void menu() { // Izbornik
@@ -40,7 +40,7 @@ void menu() { // Izbornik
 		scanf("%d", &choice);
 		if (choice < 1 || choice>3) printf("Ta opcija ne postoji!");
 	} while (choice < 1 || choice>3);
-
+	
 	//Odabir opcija!
 	switch (choice) {
 	case 1:
@@ -551,41 +551,65 @@ void endGame(int score, int timeInSeconds) {
 
 void menuScores() {
 	int choice;
+	int proba1=10, proba2=10;
+	PLAYER* userField;
+
+
 	//Printanje podizbornika!
 	printf("\n");
 	printf("Opcije s rezultatima\n");
 	printf("1. Ispisati 10 najboljih rezultata!\n");
 	printf("2. Obrisati trazeni rezultat!\n");
 	printf("3. Obrisati sve rezultate!\n");
-	printf("4. Nazad na glavni izbornik\n");
+	printf("4. Dodavanje vlastitog rezultata(debug)\n");
+	printf("5. Nazad na glavni izbornik\n");
 	printf("\n");
+
+
+
+	//dinamicko zauzimanje polja!!
+	
+	userField = (PLAYER*)calloc(1, sizeof(PLAYER));
+	if (userField == NULL) {
+		perror("Zauzimanje memorije za rezultate");
+		return NULL;
+	}
+
 
 	//provjera unosa
 	do {
 		printf("Odaberite opciju:");
 		scanf("%d", &choice);
-		if (choice < 1 || choice>4) printf("Unos nije ispravan!");
-	} while (choice < 1 || choice>4);
+		if (choice < 1 || choice>5) printf("Unos nije ispravan!");
+	} while (choice < 1 || choice>5);
 
 	// izbor!
 	switch (choice) {
 	case 1:
-		sort();
-		outputFile();
+		//fileOpening();
 		exit(EXIT_FAILURE);
 
 	case 2:
-		sort();
-		deleteSpecificScore();
-		sort();
+		//sort();
+		//deleteSpecificScore();
+		//sort();
 		exit(EXIT_FAILURE);
 
 	case 3:
-		fileOpening();
-		deleteScores();
+		//fileOpening();
+		//deleteScores();
 		exit(EXIT_FAILURE);
 
 	case 4:
+		if (debug == 1) {
+			fileOpening();
+			writeFile(proba1,proba2);
+		}
+		else {
+			printf("Nemate dopustenja za odabiranje ove opcije!");
+			menuScores();
+		}
+	case 5:
 
 		system("cls");
 		menu();
@@ -597,157 +621,140 @@ void menuScores() {
 
 
 void fileOpening() {
-	FILE* file = fopen("scores.txt", "w");
+	FILE* file = fopen("scores.bin", "wb");
 	if (file == NULL) {
-		perror("Kreiranje datoteke studenti.txt");
+		perror("Kreiranje datoteke scores.bin");
 		exit(EXIT_FAILURE);
 	}
-	fprintf(file, "%d",id);
+	fwrite(&idbroj, sizeof(int), 1, file);
 	fclose(file);
-
 }
 
-
-void loadFile() {
-	FILE* file = fopen("scores.txt", "r");
-	if (file == NULL) {
-		perror("Ucitavanje rezultata");
-		return NULL;
-	}
-	userField = (PLAYER*)calloc(1, sizeof(PLAYER));
-	if (userField == NULL) {
-		perror("Zauzimanje memorije za rezultate");
-		return NULL;
-	}
-
-}
 
 
 void writeFile(int score, int timeInSeconds) {
-	fileOpening();
-	loadFile();
-	FILE* file = fopen("scores.txt", "rb+");
+	FILE* file = fopen("scores.bin", "rb+");
 	if (file == NULL) {
-		perror("Dodavanje rezultata u scores.txt");
+		perror("Dodavanje scora u datoteke scores.bin");
 		exit(EXIT_FAILURE);
 	}
-	fscanf(file,"%d",&id);
-	printf("Broj ideova: %d\n", id);
+	fread(&idbroj, sizeof(int), 1, file);
+	printf("ID: %d\n", idbroj);
 	PLAYER temp = { 0 };
-	temp.id = id;
+	temp.id = idbroj;
 	getchar();
 	printf("Unesite username!\n");
 	scanf("%19[^\n]", temp.username);
 	temp.score = score;
 	temp.timeNedded = timeInSeconds;
-	//fseek(file, sizeof(PLAYER) * id, SEEK_CUR);
-	fprintf(file,"%d\t%s\t%d\t%d\n",temp.id,temp.username,temp.score,temp.timeNedded);
-	//rewind(file);
-	id++;
-	free(userField);
-	fprintf(file,"%d",id);
+	fseek(file, sizeof(PLAYER) * idbroj, SEEK_CUR);
+	fwrite(&temp, sizeof(PLAYER), 1, file);
+	rewind(file);
+	idbroj++;
+	fwrite(&idbroj, sizeof(int), 1, file);
 	fclose(file);
 }
 
 
-void outputFile() {
-	int i;
-	FILE* file = fopen("scores.txt", "a+");
-	printf("test1");
-	if (file == NULL) {
-		perror("Kreiranje datoteke scores.txt");
-		exit(EXIT_FAILURE);
-	}
-	fscanf(file,"%d",&userField->id);
-	if (id < 10) {
-		for (i = 0; i < id; i++) {
-			printf("ID:%d ,Username:%s, Score:%d, Vrijeme:%d\n", (userField + i)->id, (userField + i)->username, (userField + i)->score, (userField + i)->timeNedded);
-		}
-	}
-	else {
-		for (i = 0; i < 10; i++) {
-			printf("ID:%d ,Username:%s, Score:%d, Vrijeme:%d\n", (userField + i)->id, (userField + i)->username, (userField + i)->score, (userField + i)->timeNedded);
-		}
-	}
-	printf("test1");
-	free(userField);
-	fclose(file);
-}
 
-
-void deleteSpecificScore() {
-	FILE* file = fopen("scores.txt", "ab+");
-	FILE* temp = fopen("temp.txt", "ab+");
-	int i;
-	int n;
-	int found;
-	do {
-		printf("Zadaj id kojeg zelis obrisati!");
-		scanf("%d", &n);
-		if (n > id)printf("Nema toliko unesenih rezultata");
-	} while (n > id);
-	for (i = 0; i < id; i++) {
-		if ((userField + i)->id != n) {
-			fwrite(&userField + i, sizeof(PLAYER), 1, temp);
-		}
-		else found = 1;
-	}
-	if (!found) {
-		printf("Nema tog id-a!");
-	}
-
-	fclose(file);
-	fclose(temp);
-	free(userField);
-	remove("scores.txt");
-	rename("temp.txt", "scores.txt");
-}
-
-
-void deleteScores() {
-	FILE* file = fopen("scores.txt", "ab+");
-	FILE* temp = fopen("C:temp.txt", "ab+");
-
-	fclose(file);
-	fclose(temp);
-	free(userField);
-	remove("scores.txt");
-	rename("temp.txt", "scores.txt");
-}
-
-
-void change(int* const veci, int* const manji) {
-	int temp = 0;
-	temp = *manji;
-	*manji = *veci;
-	*veci = temp;
-}
-
-
-void sort() {
-	FILE* temp = fopen("temp.txt", "ab+");
-	FILE* file = fopen("scores.txt", "ab+");
-	int min = -1;
-	int i, j;
-	for (i = 0; i < id - 1; i++)
-	{
-		min = i;
-		for (j = i + 1; j < id; j++)
-		{
-			if ((userField + j)->score < (userField + min)->score) {
-				min = j;
-			}
-		}
-		change(&(userField + j)->score, &(userField + min)->score);
-	}
-
-
-	for (i = 0; i < id; i++) {
-		fwrite(&userField + i, sizeof(PLAYER), 1, temp);
-	}
-	fclose(temp);
-	fclose(file);
-	free(userField);
-	remove("scores.txt");
-	rename("temp.txt", "scores.txt");
-}
+//void outputFile() {
+//	int i;
+//	FILE* file = fopen("scores.txt", "a+");
+//	printf("test1");
+//	if (file == NULL) {
+//		perror("Kreiranje datoteke scores.txt");
+//		exit(EXIT_FAILURE);
+//	}
+//	fscanf(file,"%d",&userField->id);
+//	if (id < 10) {
+//		for (i = 0; i < id; i++) {
+//			printf("ID:%d ,Username:%s, Score:%d, Vrijeme:%d\n", (userField + i)->id, (userField + i)->username, (userField + i)->score, (userField + i)->timeNedded);
+//		}
+//	}
+//	else {
+//		for (i = 0; i < 10; i++) {
+//			printf("ID:%d ,Username:%s, Score:%d, Vrijeme:%d\n", (userField + i)->id, (userField + i)->username, (userField + i)->score, (userField + i)->timeNedded);
+//		}
+//	}
+//	printf("test1");
+//	free(userField);
+//	fclose(file);
+//}
+//
+//
+//void deleteSpecificScore() {
+//	FILE* file = fopen("scores.txt", "ab+");
+//	FILE* temp = fopen("temp.txt", "ab+");
+//	int i;
+//	int n;
+//	int found;
+//	do {
+//		printf("Zadaj id kojeg zelis obrisati!");
+//		scanf("%d", &n);
+//		if (n > id)printf("Nema toliko unesenih rezultata");
+//	} while (n > id);
+//	for (i = 0; i < id; i++) {
+//		if ((userField + i)->id != n) {
+//			fwrite(&userField + i, sizeof(PLAYER), 1, temp);
+//		}
+//		else found = 1;
+//	}
+//	if (!found) {
+//		printf("Nema tog id-a!");
+//	}
+//
+//	fclose(file);
+//	fclose(temp);
+//	free(userField);
+//	remove("scores.txt");
+//	rename("temp.txt", "scores.txt");
+//}
+//
+//
+//void deleteScores() {
+//	FILE* file = fopen("scores.txt", "ab+");
+//	FILE* temp = fopen("C:temp.txt", "ab+");
+//
+//	fclose(file);
+//	fclose(temp);
+//	free(userField);
+//	remove("scores.txt");
+//	rename("temp.txt", "scores.txt");
+//}
+//
+//
+//void change(int* const veci, int* const manji) {
+//	int temp = 0;
+//	temp = *manji;
+//	*manji = *veci;
+//	*veci = temp;
+//}
+//
+//
+//void sort() {
+//	FILE* temp = fopen("temp.txt", "ab+");
+//	FILE* file = fopen("scores.txt", "ab+");
+//	int min = -1;
+//	int i, j;
+//	for (i = 0; i < id - 1; i++)
+//	{
+//		min = i;
+//		for (j = i + 1; j < id; j++)
+//		{
+//			if ((userField + j)->score < (userField + min)->score) {
+//				min = j;
+//			}
+//		}
+//		change(&(userField + j)->score, &(userField + min)->score);
+//	}
+//
+//
+//	for (i = 0; i < id; i++) {
+//		fwrite(&userField + i, sizeof(PLAYER), 1, temp);
+//	}
+//	fclose(temp);
+//	fclose(file);
+//	free(userField);
+//	remove("scores.txt");
+//	rename("temp.txt", "scores.txt");
+//}
