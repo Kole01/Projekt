@@ -18,16 +18,16 @@ void boardPrintBlank();
 int boardMatch(int, int,int);
 void finalBoard();
 void endGame(int, int);
-void boardMine();
 void win(int,int);
 void writeFile(int,int);
 void fileOpening();
-void outputFile();
+void outputFile(PLAYER*);
 void menuScores();
 void deleteScores();
 void deleteSpecificScore();
-void sort();
-void change();
+void sort(PLAYER*);
+void change(int* const, int* const);
+void* allocateArray();
 
 
 
