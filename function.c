@@ -551,7 +551,7 @@ void endGame(int score, int timeInSeconds) {
 
 void menuScores() {
 	int choice;
-	int proba1=10, proba2=10;
+	int proba1, proba2;
 	PLAYER* userField;
 
 
@@ -611,6 +611,10 @@ void menuScores() {
 
 	case 4:
 		if (debug == 1) {
+			printf("Unesite rezultat");
+			scanf("%d", &proba1);
+			printf("Unesite vrijeme");
+			scanf("%d", &proba2);
 			writeFile(proba1,proba2);
 		}
 		else {
@@ -688,8 +692,8 @@ void outputFile(PLAYER* userField) {
 	}
 
 	fread(&idbroj, sizeof(int), 1, file);
-	
-	fread(userField, sizeof(PLAYER), &idbroj, file);
+
+	fread(userField, sizeof(PLAYER), idbroj, file);
 
 	if (userField == NULL) {
 		printf("Polje je prazno!\n");
@@ -771,30 +775,38 @@ void sort(PLAYER* userField) {
 	}
 
 	int i, j;
-	int temp3;
 	
-	for (i = 0; i < idbroj-1; i++)
+	for (i = 0; i < idbroj - 1; i++)
 	{
-		max = (userField+i)->score;
-		for(j=i+1;j<idbroj;j++){ 
-			if ((userField + j)->score > max) {
-				max = j;
-				temp3 = j;
+		for (j = 0; j < (idbroj - 1 - i); j++)
+		{
+			if ((userField+j)->score < (userField + j+1)->score)
+			{
+				*temp1 = *(userField + j);
+				*(userField + j) = *(userField + j + 1);
+				*(userField + j + 1) = *temp1;
 			}
-			
 		}
-		*temp1 = *(userField + i);
-		*(userField + i) = *(userField + temp3);
-		*(userField + temp3) = *temp1;
-		
+	}
+	if (idbroj > 10) {
+		for (i = 0; i < 10; i++) {
+			printf("ID:%d\tUsername:%s\tScore:%d\tVrijeme igrano:%d \n", (userField + i)->id, (userField + i)->username, (userField + i)->score, (userField + i)->timeNedded);
+		}
+	}
+	else {
+		for (i = 0; i < idbroj; i++) {
+			printf("ID:%d\tUsername:%s\tScore:%d\tVrijeme igrano:%d \n", (userField + i)->id, (userField + i)->username, (userField + i)->score, (userField + i)->timeNedded);
+		}
 	}
 
-
-	for (i = 0; i <idbroj; i++) {
-		fwrite((userField + i), sizeof(PLAYER), 1, temp);
-	}
-	fclose(temp);
+	
+	fwrite((userField + i), sizeof(PLAYER), idbroj,temp);
+	
+	remove(file);
+	rename(temp, file);
 	fclose(file);
-	remove("scores.bin");
-	rename("temp.bin", "scores.bin");
+	fclose(temp);
+	
+	
+
 }
