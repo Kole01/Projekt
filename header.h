@@ -24,9 +24,8 @@ void fileOpening();
 void outputFile(PLAYER*);
 void menuScores();
 void deleteScores();
-void deleteSpecificScore();
-void sort(PLAYER*);
-void change(int* const, int* const);
+void deleteSpecificScore(PLAYER*);
+PLAYER* sort(PLAYER*);
 void* allocateArray();
 
 
