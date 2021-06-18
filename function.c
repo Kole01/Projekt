@@ -569,11 +569,11 @@ void menuScores() {
 
 	//dinamicko zauzimanje polja!!
 	
-	userField = (PLAYER*)calloc(1, sizeof(PLAYER));
+	/*userField = (PLAYER*)calloc(1, sizeof(PLAYER));
 	if (userField == NULL) {
 		perror("Zauzimanje memorije za rezultate");
 		return NULL;
-	}
+	}*/
 
 
 	//provjera unosa
@@ -586,34 +586,35 @@ void menuScores() {
 	// izbor!
 	switch (choice) {
 	case 1:
-		if (userField != NULL) {
-			free(userField);
-			userField = NULL;
-		}
-		userField = (PLAYER*)allocateArray();
+		userField = allocateArray();
 		if (userField == NULL) {
 			exit(EXIT_FAILURE);
 		}
-		sort(userField);
+		userField = sort(userField);
 		outputFile(userField);
+		free(userField);
 		exit(EXIT_FAILURE);
 
 	case 2:
-		//sort();
-		//deleteSpecificScore();
-		//sort();
+		userField = allocateArray();
+		if (userField == NULL) {
+			exit(EXIT_FAILURE);
+		}
+		userField = sort(userField);
+		
+		deleteSpecificScore(userField);
+		free(userField);
 		exit(EXIT_FAILURE);
 
 	case 3:
-		//fileOpening();
-		//deleteScores();
+		deleteScores();
 		exit(EXIT_FAILURE);
 
 	case 4:
 		if (debug == 1) {
-			printf("Unesite rezultat");
+			printf("Unesite rezultat: ");
 			scanf("%d", &proba1);
-			printf("Unesite vrijeme");
+			printf("Unesite vrijeme: ");
 			scanf("%d", &proba2);
 			writeFile(proba1,proba2);
 		}
@@ -646,7 +647,7 @@ void* allocateArray() {
 	}
 	fread(userField, sizeof(PLAYER), idbroj, file);
 	return userField;
-
+	
 }
 
 void fileOpening() {
@@ -667,13 +668,13 @@ void writeFile(int score, int timeInSeconds) {
 		exit(EXIT_FAILURE);
 	}
 	fread(&idbroj, sizeof(int), 1, file);
-	PLAYER temp = { 0 };
-	printf("\nBroj unesenih rezultata je %d", idbroj);
-	temp.id = idbroj;
-	printf("\nUnesite username!\n");
-	scanf("%19s", temp.username);
-	temp.score = score * scoreMultiplier;
-	temp.timeNedded = timeInSeconds;
+	PLAYER* temp = { 0 };
+	//printf("\nBroj unesenih rezultata je %d", idbroj);
+	temp->id = idbroj;
+	printf("\nUnesite username: ");
+	scanf("%19s", temp->username);
+	temp->score = score * scoreMultiplier;
+	temp->timeNedded = timeInSeconds;
 	fseek(file, sizeof(PLAYER) * idbroj, SEEK_CUR);
 	fwrite(&temp, sizeof(PLAYER), 1, file);
 	rewind(file);
@@ -684,91 +685,110 @@ void writeFile(int score, int timeInSeconds) {
 
 void outputFile(PLAYER* userField) {
 	int i;
-
-	FILE* file = fopen("scores.bin", "rb");
-	if (file == NULL) {
-		perror("Ucitavanje razultata iz scores.bin");
-		return NULL;
-	}
-
-	fread(&idbroj, sizeof(int), 1, file);
-
-	fread(userField, sizeof(PLAYER), idbroj, file);
-
 	if (userField == NULL) {
 		printf("Polje je prazno!\n");
 		return;
 	}
 	if (idbroj > 10) {
 		for (i = 0; i < 10; i++) {
-			printf("ID:%d\tUsername:%s\tScore:%d\tVrijeme igrano:%d \n", (userField + i)->id, (userField + i)->username, (userField+ i)->score, (userField + i)->timeNedded);
+			printf("ID: %d\tUsername: %s\tScore: %d\tVrijeme odigrano: %d \n", (userField + i)->id, (userField + i)->username, (userField + i)->score, (userField + i)->timeNedded);
 		}
 	}
-	else {
+	if (idbroj < 10) {
 		for (i = 0; i < idbroj; i++) {
-			printf("ID:%d\tUsername:%s\tScore:%d\tVrijeme igrano:%d \n", (userField + i)->id, (userField + i)->username, (userField + i)->score, (userField + i)->timeNedded);
+			printf("ID: %d\tUsername: %s\tScore: %d\tVrijeme odigrano: %d \n", (userField + i)->id, (userField + i)->username, (userField + i)->score, (userField + i)->timeNedded);
 		}
 	}
 	
 }
 
-//void deleteSpecificScore() {
-//	FILE* file = fopen("scores.txt", "ab+");
-//	FILE* temp = fopen("temp.txt", "ab+");
-//	int i;
-//	int n;
-//	int found;
-//	do {
-//		printf("Zadaj id kojeg zelis obrisati!");
-//		scanf("%d", &n);
-//		if (n > id)printf("Nema toliko unesenih rezultata");
-//	} while (n > id);
-//	for (i = 0; i < id; i++) {
-//		if ((userField + i)->id != n) {
-//			fwrite(&userField + i, sizeof(PLAYER), 1, temp);
-//		}
-//		else found = 1;
-//	}
-//	if (!found) {
-//		printf("Nema tog id-a!");
-//	}
-//
-//	fclose(file);
-//	fclose(temp);
-//	free(userField);
-//	remove("scores.txt");
-//	rename("temp.txt", "scores.txt");
-//}
-//
-//
-//void deleteScores() {
-//	FILE* file = fopen("scores.txt", "ab+");
-//	FILE* temp = fopen("C:temp.txt", "ab+");
-//
-//	fclose(file);
-//	fclose(temp);
-//	free(userField);
-//	remove("scores.txt");
-//	rename("temp.txt", "scores.txt");
-//}
-
-
-
-void sort(PLAYER* userField) {
-	FILE* temp = fopen("temp.bin", "ab+");
-	if (temp == NULL) {
-		perror("Otvaranje datoteke temp.bin");
-		return NULL;
-	}
-	FILE* file = fopen("scores.bin", "ab+");	
-	if (file == NULL) {
-		perror("Otvaranje datoteke scores.bin");
-		return NULL;
+void deleteSpecificScore(PLAYER* userField) {
+	
+	FILE* pF = fopen("scores.bin", "wb");
+	if (pF == NULL) {
+		perror("Brisanje studenta iz datoteke studenti.bin");
+		exit(EXIT_FAILURE);
 	}
 
-	int max=-1;
-	fread(&idbroj, sizeof(int), 1, file);
+	int i;
+	int temp;
+	int trazeni_id;
+	char exitCheck[3];
+	PLAYER* deleteScore = (PLAYER*)calloc(1, sizeof(PLAYER));
+	
+	if (userField == NULL) {
+		printf("Polje je prazno!");
+		return;
+	}
+
+	for (i = 0; i < idbroj; i++) {
+		printf("ID: %d\tUsername: %s\tScore: %d\tVrijeme odigrano: %d \n", (userField + i)->id, (userField + i)->username, (userField + i)->score, (userField + i)->timeNedded);
+	}
+
+	do {
+		printf("Unesite ID koji zelite obrisati: ");
+		scanf("%d", &trazeni_id);
+	} while (trazeni_id > idbroj);
+	for (i = 0; i < idbroj; i++) {
+		if (trazeni_id == (userField + i)->id) {
+			deleteScore = (userField + i);
+			printf("Rezultat je pronaden: \n");
+			printf("ID: %d\tUsername: %s\tScore: %d\tVrijeme odigrano: %d \n", (userField + i)->id, (userField + i)->username, (userField + i)->score, (userField + i)->timeNedded);
+			printf("Zelite li obrisati ovaj rezultat?");
+			do {
+				scanf("%2s", exitCheck);
+				if (strcmp(exitCheck, "da") == 1 && strcmp(exitCheck, "ne") == 1) printf("\nUnos nije dobar\n");
+
+			} while (strcmp(exitCheck, "da") == 1 && strcmp(exitCheck, "ne") == 1);
+
+			if (strcmp(exitCheck, "da") == 0) {
+				temp = 0;
+
+			}
+			else temp = 1;
+
+			switch (temp) {
+			case 1:
+				menuScores();
+			case 0:
+				
+				fseek(pF, sizeof(int), SEEK_SET);
+				int i;
+				int counter = 0;
+				for (i = 0; i < idbroj; i++)
+				{
+					if (deleteScore != (userField + i)) {
+						fwrite((userField + i), sizeof(PLAYER), 1, pF);
+						counter++;
+					}
+				}
+				rewind(pF);
+				fwrite(&counter, sizeof(int), 1, pF);
+				fclose(pF);
+				printf("Rezultat je obrisan!\n");
+				deleteScore = NULL;
+			}
+		}
+
+	}
+	free(deleteScore);
+}
+
+void deleteScores() {
+	printf("Zelite li uistinu obrisati rezultate?\n");
+	char potvrda[3] = { '\0' };
+	scanf("%2s", potvrda);
+	if (!strcmp("da", potvrda)) {
+		remove("scores.bin") == 0 ? printf("Rezultati su obrisani!\n") : printf("Neuspjesno brisanje reezultata!\n");
+	}
+}
+
+
+
+PLAYER* sort(PLAYER* userField) {
+
 	PLAYER* temp1 = (PLAYER*)calloc(1, sizeof(PLAYER));
+	int br = idbroj;
 	if (temp1 == NULL) {
 		perror("Zauzimanje memorije za temp");
 		return NULL;
@@ -776,9 +796,9 @@ void sort(PLAYER* userField) {
 
 	int i, j;
 	
-	for (i = 0; i < idbroj - 1; i++)
+	for (i = 0; i < br - 1; i++)
 	{
-		for (j = 0; j < (idbroj - 1 - i); j++)
+		for (j = 0; j < (br - 1 - i); j++)
 		{
 			if ((userField+j)->score < (userField + j+1)->score)
 			{
@@ -788,25 +808,6 @@ void sort(PLAYER* userField) {
 			}
 		}
 	}
-	if (idbroj > 10) {
-		for (i = 0; i < 10; i++) {
-			printf("ID:%d\tUsername:%s\tScore:%d\tVrijeme igrano:%d \n", (userField + i)->id, (userField + i)->username, (userField + i)->score, (userField + i)->timeNedded);
-		}
-	}
-	else {
-		for (i = 0; i < idbroj; i++) {
-			printf("ID:%d\tUsername:%s\tScore:%d\tVrijeme igrano:%d \n", (userField + i)->id, (userField + i)->username, (userField + i)->score, (userField + i)->timeNedded);
-		}
-	}
-
 	
-	fwrite((userField + i), sizeof(PLAYER), idbroj,temp);
-	
-	remove(file);
-	rename(temp, file);
-	fclose(file);
-	fclose(temp);
-	
-	
-
+	return userField;
 }
