@@ -54,7 +54,7 @@ void menu() { // Izbornik
 		break;
 
 	case 3://Izlaz iz programa!
-		printf("Zelite izaci?");
+		printf("Zelite izaci(da/ne)?");
 		do {
 			scanf("%2s", exitCheck);
 			if (strcmp(exitCheck, "da") == 1 && strcmp(exitCheck, "ne") == 1) printf("\nUnos nije dobar\n");
@@ -349,7 +349,7 @@ void win(int score, int timeInSeconds) {
 	score += timeInSeconds * 10;
 	printf("Za igru vam je trebalo %d sekundi", timeInSeconds);
 	writeFile(score,timeInSeconds);
-	printf("\nZelite li odigrati jos jednu igru?");
+	printf("\nZelite li odigrati jos jednu igru(da/ne)?");
 	do {
 		scanf("%2s", check);
 		if (strcmp(check, "da") == 1 && strcmp(check, "ne") == 1) printf("\nUnos nije dobar\n");
@@ -413,8 +413,6 @@ void finalBoard() {
 		printf("+\n");
 	}
 }
-
-//Pritntanje polja s odabranim poljima
 
 void boardPrint(int x, int y, int score) {
 	int i = 0, j = 0, k = 0;
@@ -525,7 +523,7 @@ void endGame(int score, int timeInSeconds) {
 	printf("\nZa igru vam je trebalo %d sekudni", timeInSeconds);
 	printf("\nPolje koje ste odabrali sadrzava minu! Igra je zavrsena!");
 	writeFile(score,timeInSeconds);
-	printf("\nZelite li odigrati jos jednu igru?");
+	printf("\nZelite li odigrati jos jednu igru(da/ne)?");
 	do {
 		scanf("%2s", check);
 		if (strcmp(check, "da") == 1 && strcmp(check, "ne") == 1) printf("\nUnos nije dobar\n");
@@ -550,31 +548,23 @@ void endGame(int score, int timeInSeconds) {
 }
 
 void menuScores() {
+	system("cls");
 	int choice;
 	int proba1, proba2;
 	PLAYER* userField;
-
+	int temp;
+	char exitCheck[3];
 
 	//Printanje podizbornika!
 	printf("\n");
-	printf("Opcije s rezultatima\n");
+	printf("Opcije s rezultatima:\n");
+	printf("\n");
 	printf("1. Ispisati 10 najboljih rezultata!\n");
 	printf("2. Obrisati trazeni rezultat!\n");
 	printf("3. Obrisati sve rezultate!\n");
 	printf("4. Dodavanje vlastitog rezultata(debug)\n");
 	printf("5. Nazad na glavni izbornik\n");
 	printf("\n");
-
-
-
-	//dinamicko zauzimanje polja!!
-	
-	/*userField = (PLAYER*)calloc(1, sizeof(PLAYER));
-	if (userField == NULL) {
-		perror("Zauzimanje memorije za rezultate");
-		return NULL;
-	}*/
-
 
 	//provjera unosa
 	do {
@@ -588,7 +578,26 @@ void menuScores() {
 	case 1:
 		userField = allocateArray();
 		if (userField == NULL) {
-			exit(EXIT_FAILURE);
+			printf("\nJos nema ni jednog rezultata zelite li odigrati igru? (da/ne)");
+			do {
+				scanf("%2s", exitCheck);
+				if (strcmp(exitCheck, "da") == 1 && strcmp(exitCheck, "ne") == 1) printf("\nUnos nije dobar\n");
+
+			} while (strcmp(exitCheck, "da") == 1 && strcmp(exitCheck, "ne") == 1);
+
+			if (strcmp(exitCheck, "da") == 0) {
+				temp = 0;
+
+			}
+			else temp = 1;
+
+			switch (temp) {
+			case 0:
+				boardDifficulty();
+				break;
+			case 1:
+				exit(EXIT_FAILURE);
+			}
 		}
 		userField = sort(userField);
 		outputFile(userField);
@@ -598,10 +607,28 @@ void menuScores() {
 	case 2:
 		userField = allocateArray();
 		if (userField == NULL) {
-			exit(EXIT_FAILURE);
+			printf("\nJos nema ni jednog rezultata zelite li odigrati igru? (da/ne)");
+			do {
+				scanf("%2s", exitCheck);
+				if (strcmp(exitCheck, "da") == 1 && strcmp(exitCheck, "ne") == 1) printf("\nUnos nije dobar\n");
+
+			} while (strcmp(exitCheck, "da") == 1 && strcmp(exitCheck, "ne") == 1);
+
+			if (strcmp(exitCheck, "da") == 0) {
+				temp = 0;
+
+			}
+			else temp = 1;
+
+			switch (temp) {
+			case 0:
+				boardDifficulty();
+				break;
+			case 1:
+				exit(EXIT_FAILURE);
+			}
 		}
 		userField = sort(userField);
-		
 		deleteSpecificScore(userField);
 		free(userField);
 		exit(EXIT_FAILURE);
@@ -635,7 +662,8 @@ void menuScores() {
 void* allocateArray() {
 	FILE* file = fopen("scores.bin", "rb");
 	if (file == NULL) {
-		perror("Ucitavanje rezultata iz scores.bin");
+		perror("Datoteka scores.bin ne postoji!!");
+		printf("Odigrajte barem jednu igru!");
 		return NULL;
 	}
 	fread(&idbroj, sizeof(int), 1, file);
@@ -668,13 +696,15 @@ void writeFile(int score, int timeInSeconds) {
 		exit(EXIT_FAILURE);
 	}
 	fread(&idbroj, sizeof(int), 1, file);
-	PLAYER* temp = { 0 };
+	PLAYER temp = {0};
+	
+	
 	//printf("\nBroj unesenih rezultata je %d", idbroj);
-	temp->id = idbroj;
+	temp.id = idbroj;
 	printf("\nUnesite username: ");
-	scanf("%19s", temp->username);
-	temp->score = score * scoreMultiplier;
-	temp->timeNedded = timeInSeconds;
+	scanf("%19s", temp.username);
+	temp.score = score * scoreMultiplier;
+	temp.timeNedded = timeInSeconds;
 	fseek(file, sizeof(PLAYER) * idbroj, SEEK_CUR);
 	fwrite(&temp, sizeof(PLAYER), 1, file);
 	rewind(file);
@@ -684,26 +714,75 @@ void writeFile(int score, int timeInSeconds) {
 }
 
 void outputFile(PLAYER* userField) {
+	system("cls");
+	char exitCheck[3];
+	int temp;
 	int i;
 	if (userField == NULL) {
 		printf("Polje je prazno!\n");
 		return;
 	}
-	if (idbroj > 10) {
-		for (i = 0; i < 10; i++) {
-			printf("ID: %d\tUsername: %s\tScore: %d\tVrijeme odigrano: %d \n", (userField + i)->id, (userField + i)->username, (userField + i)->score, (userField + i)->timeNedded);
+	else {
+		if (idbroj > 10) {
+			for (i = 0; i < 10; i++) {
+				printf("ID: %d\tUsername: %s\tScore: %d\tVrijeme igrano: %d sekunde\n", (userField + i)->id, (userField + i)->username, (userField + i)->score, (userField + i)->timeNedded);
+				
+			}
+			printf("\n");
+			printf("\nZelite li dabrati neu drugu opciju(da/ne)? ");
+			do {
+				scanf("%2s", exitCheck);
+				if (strcmp(exitCheck, "da") == 1 && strcmp(exitCheck, "ne") == 1) printf("\nUnos nije dobar\n");
+
+			} while (strcmp(exitCheck, "da") == 1 && strcmp(exitCheck, "ne") == 1);
+
+			if (strcmp(exitCheck, "da") == 0) {
+				temp = 0;
+
+			}
+			else temp = 1;
+
+			switch (temp) {
+			case 1:
+				menuScores();
+				break;
+			case 0:
+				exit(EXIT_FAILURE);
+			}
+		}
+		if (idbroj < 10) {
+			for (i = 0; i < idbroj; i++) {
+				printf("ID: %d\tUsername: %s\tScore: %d\tVrijeme igrano: %d sekunde\n", (userField + i)->id, (userField + i)->username, (userField + i)->score, (userField + i)->timeNedded);
+			}
+			printf("\n");
+			printf("\nZelite li dabrati neu drugu opciju(da/ne)?");
+			do {
+				scanf("%2s", exitCheck);
+				if (strcmp(exitCheck, "da") == 1 && strcmp(exitCheck, "ne") == 1) printf("\nUnos nije dobar\n");
+
+			} while (strcmp(exitCheck, "da") == 1 && strcmp(exitCheck, "ne") == 1);
+
+			if (strcmp(exitCheck, "da") == 0) {
+				temp = 0;
+
+			}
+			else temp = 1;
+
+			switch (temp) {
+			case 0:
+				menuScores();
+				break;
+			case 1:
+				exit(EXIT_FAILURE);
+			}
 		}
 	}
-	if (idbroj < 10) {
-		for (i = 0; i < idbroj; i++) {
-			printf("ID: %d\tUsername: %s\tScore: %d\tVrijeme odigrano: %d \n", (userField + i)->id, (userField + i)->username, (userField + i)->score, (userField + i)->timeNedded);
-		}
-	}
+	
 	
 }
 
 void deleteSpecificScore(PLAYER* userField) {
-	
+	system("cls");
 	FILE* pF = fopen("scores.bin", "wb");
 	if (pF == NULL) {
 		perror("Brisanje studenta iz datoteke studenti.bin");
@@ -720,58 +799,60 @@ void deleteSpecificScore(PLAYER* userField) {
 		printf("Polje je prazno!");
 		return;
 	}
-
-	for (i = 0; i < idbroj; i++) {
-		printf("ID: %d\tUsername: %s\tScore: %d\tVrijeme odigrano: %d \n", (userField + i)->id, (userField + i)->username, (userField + i)->score, (userField + i)->timeNedded);
-	}
-
-	do {
-		printf("Unesite ID koji zelite obrisati: ");
-		scanf("%d", &trazeni_id);
-	} while (trazeni_id > idbroj);
-	for (i = 0; i < idbroj; i++) {
-		if (trazeni_id == (userField + i)->id) {
-			deleteScore = (userField + i);
-			printf("Rezultat je pronaden: \n");
-			printf("ID: %d\tUsername: %s\tScore: %d\tVrijeme odigrano: %d \n", (userField + i)->id, (userField + i)->username, (userField + i)->score, (userField + i)->timeNedded);
-			printf("Zelite li obrisati ovaj rezultat?");
-			do {
-				scanf("%2s", exitCheck);
-				if (strcmp(exitCheck, "da") == 1 && strcmp(exitCheck, "ne") == 1) printf("\nUnos nije dobar\n");
-
-			} while (strcmp(exitCheck, "da") == 1 && strcmp(exitCheck, "ne") == 1);
-
-			if (strcmp(exitCheck, "da") == 0) {
-				temp = 0;
-
-			}
-			else temp = 1;
-
-			switch (temp) {
-			case 1:
-				menuScores();
-			case 0:
-				
-				fseek(pF, sizeof(int), SEEK_SET);
-				int i;
-				int counter = 0;
-				for (i = 0; i < idbroj; i++)
-				{
-					if (deleteScore != (userField + i)) {
-						fwrite((userField + i), sizeof(PLAYER), 1, pF);
-						counter++;
-					}
-				}
-				rewind(pF);
-				fwrite(&counter, sizeof(int), 1, pF);
-				fclose(pF);
-				printf("Rezultat je obrisan!\n");
-				deleteScore = NULL;
-			}
+	else {
+		for (i = 0; i < idbroj; i++) {
+			printf("ID: %d\tUsername: %s\tScore: %d\tVrijeme igrano: %d sekunde\n", (userField + i)->id, (userField + i)->username, (userField + i)->score, (userField + i)->timeNedded);
 		}
 
+		do {
+			printf("Unesite ID koji zelite obrisati: ");
+			scanf("%d", &trazeni_id);
+		} while (trazeni_id > idbroj);
+		for (i = 0; i < idbroj; i++) {
+			if (trazeni_id == (userField + i)->id) {
+				deleteScore = (userField + i);
+				printf("Rezultat je pronaden: \n");
+				printf("ID: %d\tUsername: %s\tScore: %d\tVrijeme igrano: %d sekunde\n", (userField + i)->id, (userField + i)->username, (userField + i)->score, (userField + i)->timeNedded);
+				printf("Zelite li obrisati ovaj rezultat?");
+				do {
+					scanf("%2s", exitCheck);
+					if (strcmp(exitCheck, "da") == 1 && strcmp(exitCheck, "ne") == 1) printf("\nUnos nije dobar\n");
+
+				} while (strcmp(exitCheck, "da") == 1 && strcmp(exitCheck, "ne") == 1);
+
+				if (strcmp(exitCheck, "da") == 0) {
+					temp = 0;
+
+				}
+				else temp = 1;
+
+				switch (temp) {
+				case 1:
+					menuScores();
+				case 0:
+
+					fseek(pF, sizeof(int), SEEK_SET);
+					int i;
+					int newID = 0;
+					for (i = 0; i < idbroj; i++)
+					{
+						if (deleteScore != (userField + i)) {
+							fwrite((userField + i), sizeof(PLAYER), 1, pF);
+							newID++;
+						}
+					}
+					rewind(pF);
+					fwrite(&newID, sizeof(int), 1, pF);
+					fclose(pF);
+					printf("Rezultat je obrisan!\n");
+					deleteScore = NULL;
+				}
+			}
+
+		}
+		free(deleteScore);
 	}
-	free(deleteScore);
+	
 }
 
 void deleteScores() {
@@ -782,8 +863,6 @@ void deleteScores() {
 		remove("scores.bin") == 0 ? printf("Rezultati su obrisani!\n") : printf("Neuspjesno brisanje reezultata!\n");
 	}
 }
-
-
 
 PLAYER* sort(PLAYER* userField) {
 
