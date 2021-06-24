@@ -14,7 +14,7 @@ int mines = 0;
 int fieldUser[20][20];
 int field[20][20];
 int size = 0;
-int debug = 1;
+int debug = 0;
 int scoreMultiplier = 1;
 
 
