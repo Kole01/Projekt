@@ -21,7 +21,7 @@ int scoreMultiplier = 1;
 
 void menu() {
 	system("cls");
-	int choice;
+	char choice;
 	char exitCheck[3];
 	int temp;
 
@@ -37,25 +37,25 @@ void menu() {
 	// Provjera unosa izbora!
 	do {
 		printf("\nOdaberite opciju :");
-		scanf("%d", &choice);
-		if (choice < 1 || choice>3) printf("Ta opcija ne postoji!");
-	} while (choice < 1 || choice>3);
+		choice=_getch();
+		if (choice < '1' || choice>'3') printf("\nTa opcija ne postoji!");
+	} while (choice < '1' || choice>'3');
 	
 	//Odabir opcija!
 	switch (choice) {
 
-	case 1://Izbornik za odabir velicine polja
+	case '1'://Izbornik za odabir velicine polja
 
 		boardDifficulty();
 		break;
 
-	case 2://Izbornik s rezultatima
+	case '2'://Izbornik s rezultatima
 
 		system("cls");
 		menuScores();
 		break;
 
-	case 3://Izlaz iz programa!
+	case '3'://Izlaz iz programa!
 
 		printf("Zelite izaci(da/ne)?");
 		do {
@@ -83,7 +83,7 @@ void menu() {
 
 void boardDifficulty() {
 	system("cls");
-	int choice;
+	char choice;
 	int score=0, timeInSeconds;
 	clock_t start, end, total;
 	//Printanje podizbornika!
@@ -97,13 +97,13 @@ void boardDifficulty() {
 	//provjera unosa
 	do {
 		printf("Odaberite opciju:");
-		scanf("%d", &choice);
-		if (choice < 1 || choice>3) printf("Unos nije ispravan!");
-	} while (choice < 1 || choice>3);
+		choice = _getch();
+		if (choice < '1' || choice>'3') printf("\nUnos nije ispravan!");
+	} while (choice < '1' || choice>'3');
 
 	// izbor!
 	switch (choice) {
-	case 1://Polje 8x8 
+	case '1'://Polje 8x8 
 
 		mines = 10;
 		size = 8;
@@ -128,7 +128,7 @@ void boardDifficulty() {
 
 		break;
 
-	case 2://polje 16x16
+	case '2'://polje 16x16
 
 		scoreMultiplier = 2;
 		size = 16;
@@ -151,7 +151,7 @@ void boardDifficulty() {
 
 		}
 
-	case 3://Povratak na glavni izbornik
+	case '3'://Povratak na glavni izbornik
 
 		system("cls");
 		menu();
@@ -560,7 +560,7 @@ void endGame(int score, int timeInSeconds) {
 
 void menuScores() {
 	system("cls");
-	int choice;
+	char choice;
 	int proba1, proba2;
 	PLAYER* userField;
 	int temp;
@@ -580,13 +580,13 @@ void menuScores() {
 	//provjera unosa
 	do {
 		printf("Odaberite opciju:");
-		scanf("%d", &choice);
-		if (choice < 1 || choice>5) printf("Unos nije ispravan!");
-	} while (choice < 1 || choice>5);
+		choice = _getch();
+		if (choice < '1' || choice>'5') printf("\nUnos nije ispravan!");
+	} while (choice < '1' || choice>'5');
 
 	// izbor!
 	switch (choice) {
-	case 1://Ispisivanje top 10 rezultata ako nije odigrana ni jedna igra upit za igranje igre
+	case '1'://Ispisivanje top 10 rezultata ako nije odigrana ni jedna igra upit za igranje igre
 		userField = allocateArray();
 		if (userField == NULL) {
 			printf("\nJos nema ni jednog rezultata zelite li odigrati igru? (da/ne)");
@@ -615,7 +615,7 @@ void menuScores() {
 		free(userField);
 		exit(EXIT_FAILURE);
 
-	case 2://Brisanje jednog rezultata, ako je polje prazno upit za igranje igre
+	case '2'://Brisanje jednog rezultata, ako je polje prazno upit za igranje igre
 		userField = allocateArray();
 		if (userField == NULL) {
 			printf("\nJos nema ni jednog rezultata zelite li odigrati igru? (da/ne)");
@@ -644,11 +644,11 @@ void menuScores() {
 		free(userField);
 		exit(EXIT_FAILURE);
 
-	case 3://Brisanje svih rezultata
+	case '3'://Brisanje svih rezultata
 		deleteScores();
 		exit(EXIT_FAILURE);
 
-	case 4://Ako je debug posatavljen na 1 korisnik zadaje rezultata koje zeli zapisati u scores.bin
+	case '4'://Ako je debug posatavljen na 1 korisnik zadaje rezultata koje zeli zapisati u scores.bin
 		//provjera debug
 		if (debug == 1) {
 			printf("Unesite rezultat: ");
@@ -661,7 +661,7 @@ void menuScores() {
 			printf("Nemate dopustenja za odabiranje ove opcije!");
 			menuScores();
 		}
-	case 5://Povratak na glavni izbornik
+	case '5'://Povratak na glavni izbornik
 
 		system("cls");
 		menu();
